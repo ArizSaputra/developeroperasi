@@ -24,7 +24,7 @@ jobs:
       run: composer install --no-dev --optimize-autoloader
         
     - name: Deploy to server via SFTP
-      uses: appleboy/ssh-action@0.1.8  # Coba versi yang lebih baru
+      uses: appleboy/ssh-action@v1.1.0
       with:
         host: ${{ secrets.SFTP_HOST }}
         username: ${{ secrets.SFTP_USERNAME }}
