@@ -20,7 +20,7 @@ jobs:
         run: touch ./database/database.sqlite
   
       - name: Copy .env
-        run: cp .env.test .env
+        run: cp .env.tested .env
 
       - name: Install app
         run: composer install
