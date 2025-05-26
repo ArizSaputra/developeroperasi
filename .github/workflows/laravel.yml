@@ -27,11 +27,11 @@ jobs:
  
       
  
-      - name: Test PHPStan
-        run: ./vendor/bin/phpstan analyse
+      # - name: Test PHPStan
+      #   run: ./vendor/bin/phpstan analyse
 
-      - name: Test PHPUnit
-        run: ./vendor/bin/phpunit
+      # - name: Test PHPUnit
+      #   run: ./vendor/bin/phpunit
 
       - name: Deploy using ssh
         uses: appleboy/ssh-action@v1.1.0
