@@ -4,8 +4,8 @@ on:
     branches:
       - main
 jobs:
-  FTP-Deploy-Action:
-    name: FTP-Deploy-Action
+  SFTP-Deploy-Action:
+    name: SFTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.1.0
@@ -17,15 +17,18 @@ jobs:
     - name: Install PHP and Composer
       uses: shivammathur/setup-php@v2
       with:
-          php-version: '8.2' # Adjust to match the PHP version used by your Laravel project
+          php-version: '8.2' # Sesuaikan dengan versi PHP yang digunakan di project Laravel Anda
           tools: 'composer'
 
     - name: Install PHP dependencies
       run: composer install --no-dev --optimize-autoloader
         
-    - name: FTP-Deploy-Action
-      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+    - name: Deploy to server via SFTP
+      uses: appleboy/ssh-action@0.1.7
       with:
-        server: ${{ secrets.SERVER }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
+        host: ${{ secrets.SFTP_HOST }}
+        username: ${{ secrets.SFTP_USERNAME }}
+        key: ${{ secrets.SFTP_PRIVATE_KEY }} # SSH Key yang sudah disimpan di Secrets GitHub
+        port: 22 # Port default untuk SSH
+        source: "./dist/*"  # Folder yang akan diupload (sesuaikan dengan folder build anda)
+        target: "/path/to/your/remote/directory" # Direktori tujuan di server
