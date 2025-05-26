@@ -42,4 +42,4 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            ./build.sh
+            ./buildsh.sh
