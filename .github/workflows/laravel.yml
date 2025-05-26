@@ -1,34 +1,46 @@
-name: Publish Website to CPanel
+name: Build, test and deploy
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+
 jobs:
-  SFTP-Deploy-Action:
-    name: SFTP-Deploy-Action
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.1.0
-      with:
-        fetch-depth: 2 
-    - name: Build assets
-      run: npm install && npm run build
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install PHP and Composer
-      uses: shivammathur/setup-php@v2
-      with:
-          php-version: '8.2' # Sesuaikan dengan versi PHP yang digunakan di project Laravel Anda
-          tools: 'composer'
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+ 
+      - name: Create database
+        run: touch ./database/database.sqlite
+  
+      - name: Copy .env
+        run: cp .env.test .env
 
-    - name: Install PHP dependencies
-      run: composer install --no-dev --optimize-autoloader
-        
-    - name: Deploy to server via SFTP
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: ${{ secrets.SFTP_HOST }}
-        username: ${{ secrets.SFTP_USERNAME }}
-        key: ${{ secrets.SFTP_PRIVATE_KEY }} # SSH Key yang sudah disimpan di Secrets GitHub
-        port: 22 # Port default untuk SSH
-        source: "./dist/*"  # Folder yang akan diupload (sesuaikan dengan folder build anda)
-        target: "/path/to/your/remote/directory" # Direktori tujuan di server
+      - name: Install app
+        run: composer install
+ 
+      - name: Run migrations
+        run: php artisan migrate
+ 
+      - name: Test PHPStan
+        run: ./vendor/bin/phpstan analyse
+
+      - name: Test PHPUnit
+        run: ./vendor/bin/phpunit
+
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          # key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            ./build.sh
