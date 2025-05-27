@@ -15,6 +15,7 @@ echo "[4/5] Publishing API Platform assets"
 php artisan api-platform:install
 
 echo "[5/5] Migrating database"
+docker exec -it laravel_app1 bash
 php artisan migrate:fresh --seed
 php artisan test
 
