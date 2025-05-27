@@ -5,8 +5,10 @@ echo "Running deploy script"
 echo "[1/5] Pulling from GitHub"
 git pull origin
 
-echo "[2/5] Creating database if one isn't found"
-touch database/database.sqlite
+echo "[2/5] Ensuring correct database host configuration"
+# Check that DB_HOST in .env matches the actual MySQL container name if using Docker
+# Example: DB_HOST=laravel_db (This should match your MySQL container name)
+sed -i 's/DB_HOST=127.0.0.1/DB_HOST=laravel_db/g' .env
 
 echo "[3/5] Installing packages using composer"
 composer install
@@ -14,7 +16,7 @@ composer install
 echo "[4/5] Publishing API Platform assets"
 php artisan api-platform:install
 
-echo "[5/5] Migrating database"
-php artisan migrate --force
+echo "[5/5] Running fresh migrations and seeding"
+php artisan migrate:fresh --seed
 
 echo "The app has been built and deployed!"
