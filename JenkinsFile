@@ -1,58 +1,44 @@
-pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME = 'glucowise_app' // Nama image Docker untuk aplikasi Laravel
-        MYSQL_PASSWORD = 'secret'
-        MYSQL_ROOT_PASSWORD = 'secret'
-        DB_NAME = 'laravel'
-        DB_USER = 'laravel_user'
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    // Checkout code dari repository Git
+node {
+    stage('Checkout') {
+        steps {
+            script {
+                // Checkout code dari repository Git ke dalam folder src
+                dir('src') {
                     git branch: 'main', url: 'https://github.com/ardhikaxx/website-glucowise.git'
                 }
             }
         }
+    }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build image Docker untuk aplikasi Laravel
-                    docker.build(IMAGE_NAME, 'src/Dockerfile')
-
-                }
-            }
-        }
-
-        stage('Deploy with Docker Compose') {
-            steps {
-                script {
-                    // Menjalankan container menggunakan docker-compose
-                    sh 'docker-compose down' // Matikan kontainer yang sedang berjalan
-                    sh 'docker-compose up -d --build' // Jalankan kontainer dengan build baru
-                }
-            }
-        }
-
-        stage('Post Deploy Checks') {
-            steps {
-                script {
-                    // Periksa apakah kontainer telah berjalan dengan benar
-                    sh 'docker ps'
-                }
-            }
+    stage('Build') {
+        // Gunakan image composer resmi dengan PHP 8.1
+        docker.image('composer:2.6').inside('-u root') {
+            sh '''
+            rm -f composer.lock
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            '''
         }
     }
 
-    post {
-        always {
-            // Bersihkan resources yang digunakan oleh Jenkins setelah deploy selesai
-            cleanWs()
+    stage('Test') {
+        docker.image('ubuntu').inside('-u root') {
+            sh 'echo "Ini adalah test"'
+            // Tambahkan testing command di sini jika perlu
         }
     }
-}
+
+    stage('Deploy to Production') {
+        docker.image('agung3wi/alpine-rsync:1.1').inside('-u root') {
+            withEnv(["PROD_HOST=174.138.25.64"]) {
+                sshagent (credentials: ['github-ssh-naga']) {
+                    sh '''
+                    mkdir -p ~/.ssh
+                    ssh-keyscan -H "$PROD_HOST" >> ~/.ssh/known_hosts
+                    rsync -rav --delete ./src/ root@$PROD_HOST:/root/prod.kelasdevops.xyz/ --exclude=.env --exclude=storage --exclude=.git
+                    '''
+                } 
+            }
+        }
+    } // <-- tutup stage Deploy
+
+} // <-- tutup node
