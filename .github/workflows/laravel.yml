@@ -37,9 +37,9 @@ jobs:
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          # key: ${{ secrets.SSH_PRIVATE_KEY }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.PRIVATE_SSH_KEY }}
+          # password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ${{ secrets.APP_PATH }}
             ./buildsh.sh
