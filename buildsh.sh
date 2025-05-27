@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Running deploy script baru"
+echo "Running deploy script baru bang"
 
 echo "[1/5] Pulling from GitHub"
 git pull origin
@@ -17,6 +17,7 @@ echo "[4/5] Publishing API Platform assets"
 php artisan api-platform:install
 
 echo "[5/5] Running fresh migrations and seeding"
+docker exec -it laravel_app1 bash
 php artisan migrate:fresh --seed
 
 echo "The app has been built and deployed!"
