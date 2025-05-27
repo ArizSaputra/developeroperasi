@@ -15,7 +15,7 @@ echo "[4/5] Publishing API Platform assets"
 php artisan api-platform:install
 
 echo "[5/5] Migrating database"
-php artisan migrate --force
+php artisan migrate:fresh --seed
 php artisan test
 
 echo "The app has been built and deployed!"
