@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     // Build image Docker untuk aplikasi Laravel menggunakan Dockerfile di folder src
-                    docker.build(IMAGE_NAME, 'src/Dockerfile')
+                    docker.build(IMAGE_NAME, '/root/glucowise/Dockerfile')
                 }
             }
         }
